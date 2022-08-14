@@ -18,11 +18,11 @@ ui <- dashboardPage(title = "Climate change" , skin ="black",
                     dashboardHeader(title = "Climate Change"),
                     dashboardSidebar(
                       sidebarMenu(
-                        menuItem("Introduction", tabName = "int"),
-                        menuItem("Warning signs", tabName = "ws"),
-                        menuItem("Result and Effect", tabName = "RE"),
-                        menuItem("The Way Forward",tabName="wf"),
-                        menuItem("Data Info",tabName = "dt")
+                       menuItem("Introduction", tabName = "int", icon = icon("info-circle")),
+                        menuItem("Warning signs", tabName = "ws",icon= icon("exclamation-triangle")),
+                        menuItem("Result and Effect", tabName = "RE",icon=icon("poll")),
+                        menuItem("The Way Forward",tabName="wf",icon=icon("caret-square-right")),
+                        menuItem("Data Info",tabName = "dt",icon=icon("th"))
                       )
                     ),
                     dashboardBody(
