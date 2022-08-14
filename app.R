@@ -60,15 +60,15 @@ ui <- dashboardPage(title = "Climate change" , skin ="black",
                                         height = "100%",span(textOutput("b"),style="font-size:16px")
                                      ),
                                   fluidRow(
-                                    box(selectInput("s", label = h1("Select Warning Sign"), choices = c("Sea Level","Antarctica mass","CO2 in Atmosphere"), selected = "SL"),
+                                    box(selectInput("s", label = h3("Select Warning Sign"), choices = c("Sea Level","Antarctica mass","CO2 in Atmosphere"), selected = "SL"),
                                          box(plotOutput("signs"), width = 12)),
                                         
                                         box(width = 5,
-                                            title = h2("Chart Information"),
+                                            title = ("Chart Information"),
                                             status = "info",
-                                            solidHeader = FALSE,
+                                            solidHeader = TRUE,
                                             collapsible = TRUE,
-                                            collapsed = TRUE,
+                                            collapsed = FALSE,
                                             height = "100%",face="bold", textOutput ("f"),style ="font-size:17px")
                                   ,
                               
@@ -83,14 +83,15 @@ ui <- dashboardPage(title = "Climate change" , skin ="black",
                                         status = "primary",
                                         solidHeader = TRUE,
                                     
-                                        height = "100%",span(textOutput("r"),style ="font-size:16px")),
-                                        fluidRow(column(12,
-                                          box(plotOutput("results"),width =15))),
+                                        height = "100%" ,span(textOutput("r"),style ="font-size:16px")),
+                       
                                         fluidRow(
-                                          box(selectInput("a", label = "Select natural disaster", choices = c("All Stacked","Drought","Earthquake","Flood","Extreme Temperature","Extreme Weather","LandSlide","Volcanic Activity","Wildfire")),
-                                          box(plotOutput("ND"),width=14)
-                                        )
-                                    )                                    
+                                          
+                                          box(plotOutput("ND"),width = 20,selectInput("a", label = "Select natural disaster", choices = c("All Stacked","Drought","Earthquake","Flood","Extreme Temperature","Extreme Weather","LandSlide","Volcanic Activity","Wildfire")))),
+                                          fluidRow(
+                                            box(plotOutput("results"),width = 20,sliderInput("year", "Year range :", min = 1880, max = 2016, value = c(1880, 2016))),width =20)
+                                        
+                                                                       
                                     ),
                         tabItem(tabName = "wf",
                                 box(width = 20,
@@ -122,7 +123,14 @@ ui <- dashboardPage(title = "Climate change" , skin ="black",
                                fluidRow( box(  selectInput("z1",label = h3("Select Dataset"), choices = c("Warning Signs","Total greenhouse gas emission by source","Greenhouse gas emissions(for 1 TWH) by source","Share of Greenhouse gas emission by company","Number of natural disasters","Mean Land-Ocean temp"), selected = "Mean Land-Ocean temp")),
                                   DT::dataTableOutput("mytable"),
                                 box(title =  "Source links",collapsible = TRUE,collapsed = TRUE
-                                    ,span(textOutput("sor"),style="font-size:14px"))
+                                    ,span(textOutput("sor"),style="font-size:14px")
+                                    ,span(textOutput("sor1"),style="font-size:14px"),
+                                    span(textOutput("sor2"),style="font-size:14px"),
+                                    span(textOutput("sor3"),style="font-size:14px"),
+                                    span(textOutput("sor4"),style="font-size:14px"),
+                                    span(textOutput("sor5"),style="font-size:14px")
+                                    )
+                            
                                )
                                 
                                 
@@ -189,8 +197,8 @@ server <- function(input, output) {
 
   output$results <- renderPlot({
    abc%>%
-      ggplot(aes(x = Year )) + 
-      geom_bar(aes(y= Mean ),stat="identity",fill = ifelse(abc$Mean > 0, "firebrick4", "dodgerblue3")) +
+      ggplot(aes(x = Year))+coord_cartesian(xlim=input$year)+
+      geom_bar(aes(y= Mean ),stat="identity",fill = ifelse(abc$Mean > 0, "firebrick4", "dodgerblue3")) + 
       ggtitle("Mean Surface-Ocean Tempearature")+
       theme_minimal()+theme(plot.title = element_text(hjust = 1, size = 16, face = "bold"))
   })
@@ -300,14 +308,11 @@ server <- function(input, output) {
                          
   output$e<- renderPlot({
     energy1%>%
-      ggplot(aes(x = Source,fill= Source )) + 
-      geom_bar(aes(y= GHG ),stat="identity") +scale_fill_manual(values=c("saddlebrown","dimgrey","royalblue4","dimgrey","cornflowerblue","firebrick2","black","darkorange","skyblue"))+
-      ggtitle("Greenhouse gas emission per TWH produced")+theme(plot.title = element_text(size = 15, face = "bold")) +theme(
-                                                                                                                             axis.ticks = element_blank(),
-                                                                                                                             panel.grid  = element_blank(),
-                                                                                                                             axis.text.x = element_blank(),
-                                                                                                                             axis.text.y = element_blank(),
-                                                                                                                             line = element_blank())+
+      ggplot(aes(x = Source,fill= Source )) +   
+      geom_bar(aes(y= GHG,),stat="identity") +
+
+      scale_fill_manual(values=c("saddlebrown","dimgrey","royalblue4","dimgrey","cornflowerblue","firebrick2","black","darkorange","skyblue"))+
+      ggtitle("Greenhouse gas emission per TWH produced") +theme_void()+theme(plot.title = element_text(size = 15, face = "bold"))+
       coord_flip()
     
     
@@ -317,11 +322,7 @@ server <- function(input, output) {
   output$l<-renderPlot({
     l%>%
     ggplot( aes(x="", y=TWH, fill=Source)) +
-      geom_bar(stat="identity", width=1) +ggtitle("Global Energy Consumption Share by Source")+ theme(axis.text = element_blank(),
-                                                                                                      axis.ticks = element_blank(),
-                                                                                                      panel.grid  = element_blank(),
-                                                                                                      
-                                                                                                      line = element_blank())+
+      geom_bar(stat="identity", width=1) +ggtitle("Global Energy Consumption Share by Source")+ theme_void()+
                                                                                                       
       theme(plot.title = element_text(size = 15, face = "bold"))+
       
@@ -355,9 +356,15 @@ server <- function(input, output) {
       datatable(N)
     }  
   }) 
-  output$sor<- renderText("https://urs.earthdata.nasa.gov/profile,https://cdn.cdp.net/cdp-production/cms/reports/documents/000/002/327/original/Carbon-Majors-Report-2017.pdf?1501833772,http://www.uni-obuda.hu/users/grollerg/LCA/hazidolgozathoz/lca-electricity%20generation%20technologies.pdf,https://ourworldindata.org/energy-key-charts,https://ourworldindata.org/grapher/number-of-natural-disaster-events,http://berkeleyearth.org/global-temperature-report-for-2021/")
-
-      
+  output$sor<- renderText("https://urs.earthdata.nasa.gov/profile")
+  output$sor1<- renderText("https://cdn.cdp.net/cdp-production/cms/reports/documents/000/002/327/original/Carbon-Majors-Report-2017.pdf?1501833772")
+  output$sor2<- renderText("http://www.uni-obuda.hu/users/grollerg/LCA/hazidolgozathoz/lca-electricity%20generation%20technologies.pdf")
+  output$sor3<- renderText("https://ourworldindata.org/energy-key-charts")
+  output$sor4<- renderText("https://ourworldindata.org/grapher/number-of-natural-disaster-events")
+  output$sor5<- renderText("  http://berkeleyearth.org/global-temperature-report-for-2021")
+  
+  
+  
   
   
 }
