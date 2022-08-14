@@ -308,8 +308,9 @@ server <- function(input, output) {
                          
   output$e<- renderPlot({
     energy1%>%
-      ggplot(aes(x = Source,fill= Source )) +   
-      geom_bar(aes(y= GHG,),stat="identity") +
+      ggplot(aes(x = Source,fill= Source, y= GHG )) +   
+      geom_bar(aes(y= GHG,),stat="identity") +geom_text(aes(label= Source), position=position_dodge(width=0.5), hjust=-0.2)+
+
 
       scale_fill_manual(values=c("saddlebrown","dimgrey","royalblue4","dimgrey","cornflowerblue","firebrick2","black","darkorange","skyblue"))+
       ggtitle("Greenhouse gas emission per TWH produced") +theme_void()+theme(plot.title = element_text(size = 15, face = "bold"))+
